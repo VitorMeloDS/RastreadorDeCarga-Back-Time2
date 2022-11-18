@@ -1,5 +1,6 @@
 import express from 'express';
 import * as bodyParser from 'body-parser';
+import { routerController } from './router/routerController';
 
 const app: express.Application = express();
 
