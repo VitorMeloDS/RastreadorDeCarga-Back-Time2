@@ -14,7 +14,9 @@ export class DBconnection {
       connection: {
         user: db.user,
         password: db.password,
-        connectString: db.tns,
+        port: db.port,
+        host: db.host,
+        database: db.dbName,
         requestTimeout: 3000,
         connectionTimeout: 3000
       },
