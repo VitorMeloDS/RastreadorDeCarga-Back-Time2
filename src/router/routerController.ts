@@ -8,4 +8,8 @@ route.get('/tracking', async (req: Request, res: Response) => {
   await charge.getCharge(req, res);
 });
 
+route.post('/tracking', async (req: Request, res: Response) => {
+  await charge.createCharge(req, res);
+});
+
 export const routerController: Router = route;
