@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { DBconnection } from '../../database/database';
+import { cargoValidator } from '../schemas/cargoSchema';
 
 export class Cargo {
   public async getCharge(req: Request, res: Response) {
@@ -8,7 +9,7 @@ export class Cargo {
     let teste: any;
 
     try {
-      teste = await conn.table('tb_carga');
+      teste = await conn.table('tb_carga').select();
 
       console.log(teste);
     } catch (e: any) {
@@ -16,34 +17,37 @@ export class Cargo {
       erro = e.message;
     }
 
-    return erro ? res.status(500).send(erro) : res.status(200).send({message: 'chegou aqui'});
+    return erro ? res.status(500).send({ message: erro }) : res.status(200).send(teste);
   }
 
-  public async createCharge(req: Request, res: Response) {
+  public async createCharge(req: Request, res: Response): Promise<object> {
     const conn = DBconnection.conn();
     let code: string;
     let idLocalizacao: any;
     let erro = '';
 
     try {
-      code = await this.generateCode();
-
-      idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
-        nome_porto: req.body.nome_porto,
-        origem: req.body.origem,
-        destino: req.body.destino
+      await cargoValidator.validateAsync(req.body).catch((e: any) => {
+        console.log(e.details[0].message);
       });
+      // code = await this.generateCode();
 
-      if (idLocalizacao) {
-        await conn.table('tb_carga').insert({
-          codigo: code,
-          status: req.body.status,
-          data_entrega: req.body.data_entrega,
-          id_localizacao: idLocalizacao.id_localizacao
-        });
-      }
+      // idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
+      //   nome_porto: req.body.nome_porto,
+      //   origem: req.body.origem,
+      //   destino: req.body.destino
+      // });
+
+      // if (idLocalizacao) {
+      //   await conn.table('tb_carga').insert({
+      //     codigo: code,
+      //     status: req.body.status,
+      //     data_entrega: req.body.data_entrega,
+      //     id_localizacao: idLocalizacao.id_localizacao
+      //   });
+      // }
     } catch (e: any) {
-      console.log(e);
+      // console.log(e);
       erro = e.message;
     }
 
