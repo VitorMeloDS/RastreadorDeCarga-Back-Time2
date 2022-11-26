@@ -28,26 +28,34 @@ export class Cargo {
 
     try {
       await cargoValidator.validateAsync(req.body).catch((e: any) => {
-        console.log(e.details[0].message);
+        console.log(e);
+        throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
       });
-      // code = await this.generateCode();
 
-      // idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
-      //   nome_porto: req.body.nome_porto,
-      //   origem: req.body.origem,
-      //   destino: req.body.destino
-      // });
+      code = await this.generateCode();
 
-      // if (idLocalizacao) {
-      //   await conn.table('tb_carga').insert({
-      //     codigo: code,
-      //     status: req.body.status,
-      //     data_entrega: req.body.data_entrega,
-      //     id_localizacao: idLocalizacao.id_localizacao
-      //   });
-      // }
+      idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
+        nome_porto: req.body.nome_porto,
+        origem: req.body.origem,
+        destino: req.body.destino
+      });
+
+      if (idLocalizacao) {
+        // console.log({
+        //   codigo: code,
+        //   status: req.body.status,
+        //   data_entrega: req.body.data_entrega,
+        //   id_localizacao: idLocalizacao[0].id_localizacao
+        // });
+        await conn.table('tb_carga').insert({
+          codigo: code,
+          status: req.body.status,
+          data_entrega: req.body.data_entrega,
+          id_localizacao: idLocalizacao[0].id_localizacao
+        });
+      }
     } catch (e: any) {
-      // console.log(e);
+      console.log(e);
       erro = e.message;
     }
 

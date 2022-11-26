@@ -1,13 +1,14 @@
 import { Knex } from 'knex';
 import kenx from 'knex';
 import { db } from '../config/app';
+import colors from 'colors';
 
 export class DBconnection {
   private static connection: Knex;
 
   static conn () {
     if (DBconnection.connection) return DBconnection.connection;
-    console.log(`conectando a ${db.tns}`);
+    console.log(colors.yellow(`conectando a ${db.tns}`));
 
     DBconnection.connection = kenx({
       client: 'pg',
