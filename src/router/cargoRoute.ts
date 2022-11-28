@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
-import { Cargo } from '../http/controllers/cargoController';
+import { CargoController } from '../http/controllers/cargoController';
 
 const route: Router = Router();
-const charge: Cargo = new Cargo();
+const charge: CargoController = new CargoController();
 
-route.get('/cargo', async (req: Request, res: Response) => {
+route.get('/cargos', async (req: Request, res: Response) => {
   await charge.getCharge(req, res);
 });
 
-route.post('/cargo', async (req: Request, res: Response) => {
+route.post('/cargos', async (req: Request, res: Response) => {
   await charge.createCharge(req, res);
 });
 

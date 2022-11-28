@@ -2,22 +2,22 @@ import { Request, Response } from 'express';
 import { DBconnection } from '../../database/database';
 import { cargoValidator } from '../schemas/cargoSchema';
 
-export class Cargo {
+export class CargoController {
   public async getCharge(req: Request, res: Response) {
-    let erro = '';
     const conn = DBconnection.conn();
-    let teste: any;
+    let erro = '';
+    let cargos: any;
 
     try {
-      teste = await conn.table('tb_carga').select();
+      cargos = await conn.table('tb_carga').select();
 
-      console.log(teste);
+      console.log(cargos);
     } catch (e: any) {
       console.log(e);
       erro = e.message;
     }
 
-    return erro ? res.status(500).send({ message: erro }) : res.status(200).send(teste);
+    return erro ? res.status(500).send({ message: erro }) : res.status(200).send(cargos);
   }
 
   public async createCharge(req: Request, res: Response): Promise<object> {
