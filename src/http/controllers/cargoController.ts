@@ -9,9 +9,11 @@ export class CargoController {
     let cargos: any;
 
     try {
-      cargos = await conn.table('tb_carga').select();
+      cargos = await conn
+        .table('tb_carga as cg')
+        .select()
+        .join('tb_localizacao as loc', 'cg.id_localizacao', 'loc.id_localizacao');
 
-      console.log(cargos);
     } catch (e: any) {
       console.log(e);
       erro = e.message;
@@ -41,12 +43,6 @@ export class CargoController {
       });
 
       if (idLocalizacao) {
-        // console.log({
-        //   codigo: code,
-        //   status: req.body.status,
-        //   data_entrega: req.body.data_entrega,
-        //   id_localizacao: idLocalizacao[0].id_localizacao
-        // });
         await conn.table('tb_carga').insert({
           codigo: code,
           status: req.body.status,
