@@ -29,33 +29,33 @@ export class CargoController {
     let erro = '';
 
     try {
-      await cargoValidator.validateAsync(req.body).catch((e: any) => {
-        console.log(e);
-        throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
-      });
+      // await cargoValidator.validateAsync(req.body).catch((e: any) => {
+      //   console.log(e);
+      //   throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
+      // });
 
       code = await this.generateCode();
 
-      idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
+      idLocalizacao = await conn.table('tb_localizacao').returning('*').insert({
         nome_porto: req.body.nome_porto,
         origem: req.body.origem,
         destino: req.body.destino
       });
 
-      if (idLocalizacao) {
-        await conn.table('tb_carga').insert({
-          codigo: code,
-          status: req.body.status,
-          data_entrega: req.body.data_entrega,
-          id_localizacao: idLocalizacao[0].id_localizacao
-        });
-      }
+      // if (idLocalizacao) {
+      //   await conn.table('tb_carga').insert({
+      //     codigo: code,
+      //     status: req.body.status,
+      //     data_entrega: req.body.data_entrega,
+      //     id_localizacao: idLocalizacao[0].id_localizacao
+      //   });
+      // }
     } catch (e: any) {
       console.log(e);
       erro = e.message;
     }
 
-    return erro ? res.status(500).send({ message: erro }) : res.status(201).send({ message: 'Carga cadastrada com sucesso!' });
+    return erro ? res.status(500).send({ message: erro }) : res.status(201).send({ message: 'Carga cadastrada com sucesso!', result: idLocalizacao });
   }
 
   private async generateCode(): Promise<any> {
