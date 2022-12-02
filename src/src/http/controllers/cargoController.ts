@@ -57,8 +57,7 @@ export class CargoController {
         origem: req.body.origem,
         destino: req.body.destino,
         status: req.body.status,
-        data_entrega: req.body.data_entrega,
-        localizacao: req.body.localizacao
+        data_entrega: req.body.data_entrega
       });
 
     } catch (e: any) {
@@ -66,7 +65,7 @@ export class CargoController {
       erro = e.message;
     }
 
-    return erro ? res.status(500).send({ message: erro }) : res.status(201).send({ message: 'Carga cadastrada com sucesso!', result: idLocalizacao });
+    return erro ? res.status(500).send({ message: erro }) : res.status(201).send({ message: 'Carga cadastrada com sucesso!' });
   }
 
   private async generateCode(): Promise<any> {
@@ -85,5 +84,30 @@ export class CargoController {
     codeDb = await conn.table('tb_carga').select('cod_carga').where('cod_carga', code.join('')).first();
 
     return codeDb ? this.generateCode() : code.join('');
+  }
+
+  public async patchCargo(req: Request, res: Response) {
+    const conn = DBconnection.conn();
+    let erro: any;
+    let idCarga: any;
+
+    try {
+
+      idCarga = await conn.table('tb_carga').select('id_carga').where({cod_carga: req.body.codigo}).first();
+      if (idCarga) {
+        await conn.table('tb_porto_carga').returning('id_porto_carga').insert({
+          localizacao: req.body.localizacao,
+          id_carga: idCarga.id_carga
+        }).catch((e: any) => {
+          erro = { message: `Erro ao atualizar localização: ${e.message}`};
+        });
+      } else {
+        erro = { message: `Não existe carga com o código [${req.body.codigo}]`};
+      }
+
+      return erro ? res.status(500).send(erro) : res.status(200).send({ message: 'Localização atualizada com sucesso!' });
+    } catch (e: any) {
+      console.log(e);
+    }
   }
 }

@@ -12,4 +12,8 @@ route.post('/cargos', async (req: Request, res: Response) => {
   await charge.createCharge(req, res);
 });
 
+route.patch('/cargos', async (req: Request, res: Response) => {
+  await charge.patchCargo(req, res);
+});
+
 export const cargoRoute: Router = route;
