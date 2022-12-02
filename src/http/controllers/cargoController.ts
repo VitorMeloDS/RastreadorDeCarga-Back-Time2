@@ -3,16 +3,33 @@ import { DBconnection } from '../../database/database';
 import { cargoValidator } from '../schemas/cargoSchema';
 
 export class CargoController {
-  public async getCharge(req: Request, res: Response) {
+  public async getCharge(req: Request, res: Response): Promise<any> {
     const conn = DBconnection.conn();
     let erro = '';
     let cargos: any;
 
     try {
-      cargos = await conn
-        .table('tb_carga as cg')
-        .select()
-        .join('tb_localizacao as loc', 'cg.id_localizacao', 'loc.id_localizacao');
+      if (req.query.codigo) {
+        await conn
+          .table('tb_carga as cg')
+          .select()
+          .where({ cod_carga: req.query.codigo })
+          .join('tb_porto_carga as pc', 'pc.id_porto_carga', 'cg.id_porto_carga')
+          .then(async (data: any) => {
+            if (!data[0]) {
+              cargos = await conn
+                .table('tb_carga as cg')
+                .select()
+                .where({ cod_carga: req.query.codigo });
+            } else {
+              cargos = data;
+            }
+          });
+      } else {
+        cargos = await conn
+          .table('tb_carga')
+          .select();
+      }
 
     } catch (e: any) {
       console.log(e);
@@ -25,31 +42,25 @@ export class CargoController {
   public async createCharge(req: Request, res: Response): Promise<object> {
     const conn = DBconnection.conn();
     let code: string;
-    let idLocalizacao: any;
     let erro = '';
 
     try {
-      await cargoValidator.validateAsync(req.body).catch((e: any) => {
-        console.log(e);
-        throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
-      });
+      // await cargoValidator.validateAsync(req.body).catch((e: any) => {
+      //   console.log(e);
+      //   throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
+      // });
 
       code = await this.generateCode();
 
-      idLocalizacao = await conn.table('tb_localizacao').returning('id_localizacao').insert({
-        nome_porto: req.body.nome_porto,
+      await conn.table('tb_carga').insert({
+        cod_carga: code,
         origem: req.body.origem,
-        destino: req.body.destino
+        destino: req.body.destino,
+        status: req.body.status,
+        data_entrega: req.body.data_entrega,
+        localizacao: req.body.localizacao
       });
 
-      if (idLocalizacao) {
-        await conn.table('tb_carga').insert({
-          codigo: code,
-          status: req.body.status,
-          data_entrega: req.body.data_entrega,
-          id_localizacao: idLocalizacao[0].id_localizacao
-        });
-      }
     } catch (e: any) {
       console.log(e);
       erro = e.message;
@@ -71,7 +82,7 @@ export class CargoController {
       if (index > 3) code.push(num[Math.floor((Math.random() * num.length))]);
     }
 
-    codeDb = await conn.table('tb_carga').select('codigo').where('codigo', code.join('')).first();
+    codeDb = await conn.table('tb_carga').select('cod_carga').where('cod_carga', code.join('')).first();
 
     return codeDb ? this.generateCode() : code.join('');
   }
