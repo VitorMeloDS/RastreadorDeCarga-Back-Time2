@@ -97,6 +97,7 @@ export class CargoController {
       if (idCarga) {
         await conn.table('tb_porto_carga').returning('id_porto_carga').insert({
           localizacao: req.body.localizacao,
+          status: req.body.status,
           id_carga: idCarga.id_carga
         }).catch((e: any) => {
           erro = { message: `Erro ao atualizar localização: ${e.message}`};
