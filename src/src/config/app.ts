@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
 export const server = {
-  port: process.env.APP_PORT,
-  host: process.env.APP_HOST
+  port: process.env.PORT,
+  host: process.env.HOST
 };
 
 export const db = {
