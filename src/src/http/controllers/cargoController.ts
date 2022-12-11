@@ -10,7 +10,7 @@ export class CargoController {
 
     try {
       if (req.query.codigo) {
-        await conn
+        cargos = await conn
           .table('tb_carga as cg')
           .select()
           .where({ cod_carga: req.query.codigo });
