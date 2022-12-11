@@ -13,18 +13,18 @@ export class CargoController {
         await conn
           .table('tb_carga as cg')
           .select()
-          .where({ cod_carga: req.query.codigo })
-          .join('tb_porto_carga as pc', 'pc.id_porto_carga', 'cg.id_porto_carga')
-          .then(async (data: any) => {
-            if (!data[0]) {
-              cargos = await conn
-                .table('tb_carga as cg')
-                .select()
-                .where({ cod_carga: req.query.codigo });
-            } else {
-              cargos = data;
-            }
-          });
+          .where({ cod_carga: req.query.codigo });
+        // .join('tb_porto_carga as pc', 'pc.id_porto_carga', 'cg.id_porto_carga')
+        // .then(async (data: any) => {
+        //   if (!data[0]) {
+        //     cargos = await conn
+        //       .table('tb_carga as cg')
+        //       .select()
+        //       .where({ cod_carga: req.query.codigo });
+        //   } else {
+        //     cargos = data;
+        //   }
+        // });
       } else {
         cargos = await conn
           .table('tb_carga')
@@ -52,13 +52,15 @@ export class CargoController {
 
       code = await this.generateCode();
 
-      await conn.table('tb_carga').insert({
-        cod_carga: code,
-        origem: req.body.origem,
-        destino: req.body.destino,
-        status: req.body.status,
-        data_entrega: req.body.data_entrega
-      });
+      await conn.table('tb_carga')
+        .returning('id_carga')
+        .insert({
+          cod_carga: code,
+          origem: req.body.origem,
+          destino: req.body.destino,
+          status: req.body.status,
+          data_entrega: req.body.data_entrega
+        });
 
     } catch (e: any) {
       console.log(e);
