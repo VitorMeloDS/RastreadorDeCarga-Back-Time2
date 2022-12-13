@@ -5,7 +5,10 @@ import { cargoValidator } from '../schemas/cargoSchema';
 export class CargoController {
   public async getCharge(req: Request, res: Response): Promise<any> {
     const conn = DBconnection.conn();
-    let erro = '';
+    let erro = {
+      status: 200,
+      msgErro: ''
+    };
     let cargos: any;
 
     try {
@@ -16,13 +19,17 @@ export class CargoController {
           .where({ cod_carga: req.query.codigo })
           .first();
 
+        if (!cargos) {
+          erro.status = 400;
+          throw { message: `Não existe carga com o código ${req.query.codigo}`};
+        }
+
         await conn
           .table('tb_porto_carga')
           .select()
           .whereIn('id_carga', conn.table('tb_carga').select('id_carga'))
           .then((data: any) => {
             cargos['status'] = data;
-            console.log(cargos);
           });
       } else {
         cargos = await conn
@@ -32,10 +39,13 @@ export class CargoController {
 
     } catch (e: any) {
       console.log(e);
-      erro = e.message;
+      if (erro.status === 200) {
+        erro.status = 500;
+      }
+      erro.msgErro = e.message;
     }
 
-    return erro ? res.status(500).send({ message: erro }) : res.status(200).send(cargos);
+    return erro.msgErro ? res.status(erro.status).send({ message: erro.msgErro }) : res.status(200).send(cargos);
   }
 
   public async createCharge(req: Request, res: Response): Promise<object> {
