@@ -13,18 +13,17 @@ export class CargoController {
         cargos = await conn
           .table('tb_carga as cg')
           .select()
-          .where({ cod_carga: req.query.codigo });
-        // .join('tb_porto_carga as pc', 'pc.id_porto_carga', 'cg.id_porto_carga')
-        // .then(async (data: any) => {
-        //   if (!data[0]) {
-        //     cargos = await conn
-        //       .table('tb_carga as cg')
-        //       .select()
-        //       .where({ cod_carga: req.query.codigo });
-        //   } else {
-        //     cargos = data;
-        //   }
-        // });
+          .where({ cod_carga: req.query.codigo })
+          .first();
+
+        await conn
+          .table('tb_porto_carga')
+          .select()
+          .whereIn('id_carga', conn.table('tb_carga').select('id_carga'))
+          .then((data: any) => {
+            cargos['status'] = data;
+            console.log(cargos);
+          });
       } else {
         cargos = await conn
           .table('tb_carga')
@@ -45,10 +44,10 @@ export class CargoController {
     let erro = '';
 
     try {
-      // await cargoValidator.validateAsync(req.body).catch((e: any) => {
-      //   console.log(e);
-      //   throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
-      // });
+      await cargoValidator.validateAsync(req.body).catch((e: any) => {
+        console.log(e);
+        throw { message: `'${e.details[0].message.split('"')[1]}' é um campo obrigatório!`};
+      });
 
       code = await this.generateCode();
 
