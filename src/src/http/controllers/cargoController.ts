@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { DBconnection } from '../../database/database';
 import { cargoValidator } from '../schemas/cargoSchema';
+import moment from 'moment-timezone';
 
 export class CargoController {
   public async getCharge(req: Request, res: Response): Promise<any> {
@@ -26,10 +27,10 @@ export class CargoController {
 
         await conn
           .table('tb_porto_carga')
-          .select()
+          .select('localizacao', 'data_modificacao')
           .whereIn('id_carga', conn.table('tb_carga').select('id_carga'))
           .then((data: any) => {
-            cargos['status'] = data;
+            cargos['historico'] = data;
           });
       } else {
         cargos = await conn
@@ -103,16 +104,23 @@ export class CargoController {
     let idCarga: any;
 
     try {
-
       idCarga = await conn.table('tb_carga').select('id_carga').where({cod_carga: req.body.codigo}).first();
+
       if (idCarga) {
         await conn.table('tb_porto_carga').returning('id_porto_carga').insert({
           localizacao: req.body.localizacao,
-          status: req.body.status,
+          data_modificacao: moment(req.body.data_modificacao).tz('America/Sao_Paulo').format('DD/MM/YYYY'),
           id_carga: idCarga.id_carga
         }).catch((e: any) => {
           erro = { message: `Erro ao atualizar localização: ${e.message}`};
         });
+
+        await conn.table('tb_carga')
+          .update({
+            status: req.body.status
+          })
+          .where({cod_carga: req.body.codigo});
+
       } else {
         erro = { message: `Não existe carga com o código [${req.body.codigo}]`};
       }
