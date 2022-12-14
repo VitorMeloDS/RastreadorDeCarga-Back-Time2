@@ -1,9 +1,8 @@
 import express from 'express';
 import * as bodyParser from 'body-parser';
-import { routerController } from './router/routerController';
+import { routerController } from './router/routerControl';
 import { server } from './config/app';
 import cors from 'cors';
-import { url } from 'inspector';
 
 const app: express.Application = express();
 
