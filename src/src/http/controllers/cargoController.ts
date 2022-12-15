@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { DBconnection } from '../../database/database';
 import { cargoValidator } from '../schemas/cargoSchema';
-import moment from 'moment-timezone';
 
 export class CargoController {
   public async getCharge(req: Request, res: Response): Promise<any> {
@@ -109,7 +108,7 @@ export class CargoController {
       if (idCarga) {
         await conn.table('tb_porto_carga').returning('id_porto_carga').insert({
           localizacao: req.body.localizacao,
-          data_modificacao: moment(req.body.data_modificacao).tz('America/Sao_Paulo').format('DD/MM/YYYY'),
+          data_modificacao: req.body.data_modificacao,
           id_carga: idCarga.id_carga
         }).catch((e: any) => {
           erro = { message: `Erro ao atualizar localização: ${e.message}`};
@@ -130,4 +129,8 @@ export class CargoController {
       console.log(e);
     }
   }
+
+  // public async deleteCargo(req: Request, res: Response): Promise<void> {
+
+  // }
 }
