@@ -28,7 +28,7 @@ export class CargoController {
           .table('tb_porto_carga')
           .select('localizacao', 'data_modificacao')
           .whereIn('id_carga', conn.table('tb_carga').select('id_carga').where({cod_carga: req.query.codigo}))
-          .orderBy('data_modificacao', 'desc')
+          .orderBy('id_porto_carga', 'desc')
           .then((data: any) => {
             cargos['historico'] = data;
           });
@@ -131,7 +131,13 @@ export class CargoController {
     }
   }
 
-  // public async deleteCargo(req: Request, res: Response): Promise<void> {
+  public async deleteCargo(req: Request, res: Response): Promise<void> {
+    const conn = DBconnection.conn();
 
-  // }
+    try {
+      await conn.delete;
+    } catch (e: any) {
+      console.log(e);
+    }
+  }
 }
