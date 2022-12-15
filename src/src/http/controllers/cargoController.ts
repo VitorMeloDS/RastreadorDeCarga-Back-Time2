@@ -27,7 +27,8 @@ export class CargoController {
         await conn
           .table('tb_porto_carga')
           .select('localizacao', 'data_modificacao')
-          .whereIn('id_carga', conn.table('tb_carga').select('id_carga'))
+          .whereIn('id_carga', conn.table('tb_carga').select('id_carga').where({cod_carga: req.query.codigo}))
+          .orderBy('data_modificacao', 'desc')
           .then((data: any) => {
             cargos['historico'] = data;
           });
