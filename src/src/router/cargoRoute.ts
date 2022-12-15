@@ -16,4 +16,8 @@ route.patch('/cargos', async (req: Request, res: Response) => {
   await charge.patchCargo(req, res);
 });
 
+route.delete('/cargos', async (req: Request, res: Response) => {
+  await charge.deleteCargo(req, res);
+});
+
 export const cargoRoute: Router = route;

@@ -131,13 +131,47 @@ export class CargoController {
     }
   }
 
-  public async deleteCargo(req: Request, res: Response): Promise<void> {
+  public async deleteCargo(req: Request, res: Response): Promise<any> {
     const conn = DBconnection.conn();
+    let idCargo: any;
+    let erro = {
+      status: 200,
+      msgErro: ''
+    };
 
     try {
-      await conn.delete;
+      idCargo = await conn
+        .table('tb_carga')
+        .select('id_carga')
+        .where({ cod_carga: req.query.codigo })
+        .first();
+
+      if (idCargo) {
+        await conn
+          .table('tb_porto_carga')
+          .where({id_carga: idCargo.id_carga})
+          .delete()
+          .then(async () => {
+            await conn
+              .table('tb_carga')
+              .where({id_carga: idCargo.id_carga})
+              .delete();
+          });
+
+        erro.msgErro = `Carga com o código ${req.query.codigo} deletada!`;
+      } else {
+        erro.status = 400;
+        erro.msgErro = `Carga com o código ${req.query.codigo} não existe!`;
+      }
+
     } catch (e: any) {
       console.log(e);
+      if (erro.status === 200) {
+        erro.status = 500;
+      }
+      erro.msgErro = e.message;
     }
+
+    return erro.msgErro ? res.status(erro.status).send({ message: erro.msgErro }) : res.status(200).send({ message: erro.msgErro });
   }
 }
